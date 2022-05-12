@@ -1,4 +1,3 @@
 ## Calendar Backend
 
-user: mern_user
-password: 6KdznHvERdSfFKs1
+this is the bakcend for the calendar app
