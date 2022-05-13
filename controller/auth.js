@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs/dist/bcrypt");
 const { response } = require("express");
 const generateJWT = require("../helpers/jwt");
-const Usuario = require('../models/Usuario');
+const User = require('../models/User');
 
 const createUser = async (req, res = response) => {
 
@@ -9,30 +9,30 @@ const createUser = async (req, res = response) => {
 
 
     try {
-        let usuario = await Usuario.findOne({ email });
+        let user = await User.findOne({ email });
 
-        if (usuario) {
+        if (user) {
             return res.status(400).json({
                 ok: false,
-                msg: 'El usuario ya existe'
+                msg: 'User already exists'
             });
         }
 
-        usuario = new Usuario(req.body);
+        user = new User(req.body);
 
         // ? Hash password
         const salt = bcrypt.genSaltSync(10);
-        usuario.password = bcrypt.hashSync(password, salt);
+        user.password = bcrypt.hashSync(password, salt);
 
-        await usuario.save();
+        await user.save();
 
         // ? Generate token
-        const token = await generateJWT(usuario.id, usuario.name);
+        const token = await generateJWT(user.id, user.name);
         
         res.status(201).json({
             ok: true,
-            uid: usuario.id,
-            name: usuario.name,
+            uid: user.id,
+            name: user.name,
             token
         });
 
@@ -53,33 +53,33 @@ const loginUser = async(req, res = response) => {
     const { email, password } = req.body;
 
     try {
-        const usuario = await Usuario.findOne({ email });
+        const user = await User.findOne({ email });
 
-        if (!usuario) {
+        if (!user) {
             return res.status(400).json({
                 ok: false,
-                msg: 'El usuario no existe'
+                msg: 'User doesn\'t exists'
             });
         }
 
         // ? check password
 
-        const validPassword = bcrypt.compareSync(password, usuario.password);
+        const validPassword = bcrypt.compareSync(password, user.password);
 
         if(!validPassword){
             return res.status(400).json({
                 ok: false,
-                msg: 'Password incorrecto'
+                msg: 'Password is incorrect'
             });
         }
 
         // ? Generate token
-        const token = await generateJWT(usuario.id, usuario.name);
+        const token = await generateJWT(user.id, user.name);
 
         res.status(200).json({
             ok: true,
-            uid: usuario.id,
-            name: usuario.name,
+            uid: user.id,
+            name: user.name,
             token
         });
 
