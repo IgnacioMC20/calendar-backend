@@ -27,9 +27,12 @@ router.post('/', [
     validarCampos
 ], createEvents);
 
-// ? Crear un nuevo evento
+// ? Actualizar un nuevo evento
 router.put('/:id', [
-    check(),
+    check('title', 'title is required').not().isEmpty(),
+    check('notes', 'notes are required').not().isEmpty(),
+    check('start', 'Start date is not valid').custom(isDate),
+    check('end', 'End date is not valid').custom(isDate),
     validarCampos
 ], updateEvent);
 

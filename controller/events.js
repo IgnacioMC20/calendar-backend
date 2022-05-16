@@ -33,26 +33,80 @@ const createEvents = async(req, res) => {
     }
 }
 
-const updateEvent = (req, res) => {
+const updateEvent = async(req, res) => {
 
     const { id } = req.params;
 
-    return res.json({
-        ok: true,
-        id,
-        msg: 'updateEvent'
-    });
+
+    try {
+        
+        const event = await Event.findById(id);
+        if(!event) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Event not found'
+            });
+        }
+        if(event.user.toString() !== req.uid) {
+            return res.status(401).json({
+                ok: false,
+                msg: 'Not authorized'
+            });
+        }
+
+        const updatedEvent = await Event.findByIdAndUpdate(id, req.body, { new: true });
+        
+        return res.json({
+            ok: true,
+            event: updatedEvent
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            ok: false,
+            msg: 'Speak to the admin',
+            error
+        });
+    }
+    
 }
 
-const deleteEvent = (req, res) => {
+const deleteEvent = async(req, res) => {
 
     const { id } = req.params;
 
-    return res.json({
-        ok: true,
-        id,
-        msg: 'deleteEvent'
-    });
+    try {
+        
+        const event = await Event.findById(id);
+        if(!event) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Event not found'
+            });
+        }
+        if(event.user.toString() !== req.uid) {
+            return res.status(401).json({
+                ok: false,
+                msg: 'Not authorized'
+            });
+        }
+
+        await Event.findByIdAndDelete(id);
+        
+        return res.json({
+            ok: true,
+            msg: 'Event deleted'
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            ok: false,
+            msg: 'Speak to the admin',
+            error
+        });
+    }
 }
 
 module.exports = {
